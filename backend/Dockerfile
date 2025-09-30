@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY alembic.ini .
 COPY alembic/ ./alembic/
+COPY create_admin.py .
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' appuser

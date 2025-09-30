@@ -166,10 +166,7 @@ docker-compose up -d
 docker-compose exec backend alembic upgrade head
 
 # Create your first admin user
-docker-compose exec backend python -c "
-from app.core.auth import create_admin_user
-create_admin_user('admin@example.com', 'admin', 'SecurePassword123!')
-"
+docker-compose exec backend python create_admin.py admin admin@example.com Admin123
 ```
 
 ### 📱 Agent Installation on Raspberry Pi
@@ -192,6 +189,42 @@ sudo systemctl start rpi-monitoring-agent
 - **Health Check**: http://localhost:8000/health
 - **Monitoring Dashboard**: http://localhost:3000 (if using frontend)
 - **Database Admin**: http://localhost:8080 (pgAdmin)
+
+### 🔐 Authentication Quick Start
+
+After creating your admin user, test the authentication workflow:
+
+```bash
+# 1. Login and get access token
+TOKEN=$(curl -s -X POST "http://localhost:8000/api/v1/auth/simple-login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"Admin123"}' | jq -r '.access_token')
+
+# 2. Verify authentication by getting current user info
+curl -X GET "http://localhost:8000/api/v1/auth/me" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json"
+
+# Expected response:
+# {
+#   "id": "...",
+#   "email": "admin@example.com",
+#   "username": "admin",
+#   "full_name": "Administrator",
+#   "is_active": true,
+#   "is_verified": true,
+#   "created_at": "...",
+#   "last_login": "..."
+# }
+```
+
+**Using the Swagger UI:**
+
+1. Navigate to http://localhost:8000/docs
+2. Click the **"Authorize"** button (green lock icon)
+3. In the HTTPBearer section, paste your token (without "Bearer" prefix)
+4. Click **"Authorize"** then **"Close"**
+5. Now all API requests will include your authentication token
 
 ---
 
@@ -551,11 +584,93 @@ SMTP_PASSWORD=your-app-password
 
 ### Authentication
 
+#### Endpoints
+
 ```http
-POST /api/v1/auth/register
-POST /api/v1/auth/login
-POST /api/v1/auth/refresh
-GET  /api/v1/auth/me
+POST /api/v1/auth/register         # Register new user
+POST /api/v1/auth/login            # Login (OAuth2 form)
+POST /api/v1/auth/simple-login     # Login (JSON)
+POST /api/v1/auth/refresh          # Refresh access token
+GET  /api/v1/auth/me               # Get current user info
+```
+
+#### Creating Admin User (CLI)
+
+```bash
+# Create admin user using the script
+docker-compose exec backend python create_admin.py <username> <email> <password>
+
+# Example
+docker-compose exec backend python create_admin.py admin admin@example.com Admin123
+```
+
+#### Login and Get Token
+
+```bash
+# Method 1: Using simple-login endpoint (recommended for API clients)
+curl -X POST "http://localhost:8000/api/v1/auth/simple-login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "Admin123"
+  }'
+
+# Response:
+# {
+#   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#   "token_type": "bearer"
+# }
+
+# Method 2: Using OAuth2 login endpoint
+curl -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin&password=Admin123"
+```
+
+#### Using the Token
+
+```bash
+# Save token to variable
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Make authenticated requests
+curl -X GET "http://localhost:8000/api/v1/auth/me" \
+  -H "Authorization: Bearer $TOKEN"
+
+# Or extract token from login response automatically
+TOKEN=$(curl -s -X POST "http://localhost:8000/api/v1/auth/simple-login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"Admin123"}' | jq -r '.access_token')
+
+# Use it in subsequent requests
+curl -X GET "http://localhost:8000/api/v1/devices" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+#### Register New User
+
+```bash
+# Register via API
+curl -X POST "http://localhost:8000/api/v1/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "john",
+    "email": "john@example.com",
+    "password": "SecurePass123",
+    "full_name": "John Doe"
+  }'
+```
+
+#### Refresh Token
+
+```bash
+# Refresh access token using refresh token
+curl -X POST "http://localhost:8000/api/v1/auth/refresh" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "your-refresh-token-here"
+  }'
 ```
 
 ### Device Management

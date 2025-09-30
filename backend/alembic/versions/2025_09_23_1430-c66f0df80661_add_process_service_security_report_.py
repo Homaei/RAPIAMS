@@ -23,7 +23,7 @@ def upgrade() -> None:
     # Create Process table
     op.create_table('processes',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('device_id', sa.Integer(), nullable=False),
+        sa.Column('device_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('pid', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('cpu_percent', sa.Float(), nullable=True),
