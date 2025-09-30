@@ -1,0 +1,58 @@
+{
+  "gpio_devices": {
+    "buzzer": {
+      "pin": 17,
+      "mode": "OUTPUT",
+      "active_state": "HIGH",
+      "initial_state": "LOW",
+      "description": "Test buzzer for GPIO verification",
+      "max_runtime": 60,
+      "device_type": "buzzer",
+      "safety_features": {
+        "cooldown_time": 0,
+        "max_cycles_per_hour": 0
+      }
+    },
+    "pump_relay": {
+      "pin": 27,
+      "mode": "OUTPUT",
+      "active_state": "LOW",
+      "initial_state": "HIGH",
+      "description": "Water pump relay (JQC3F-05VDC-C)",
+      "max_runtime": 300,
+      "device_type": "relay",
+      "safety_features": {
+        "cooldown_time": 60,
+        "max_cycles_per_hour": 10
+      }
+    },
+    "backup_relay": {
+      "pin": 22,
+      "mode": "OUTPUT",
+      "active_state": "LOW",
+      "initial_state": "HIGH",
+      "description": "Backup relay for additional control",
+      "max_runtime": 600,
+      "device_type": "relay",
+      "safety_features": {
+        "cooldown_time": 30,
+        "max_cycles_per_hour": 20
+      }
+    }
+  },
+  "gpio_settings": {
+    "mode": "BCM",
+    "warnings": false,
+    "auto_cleanup": true
+  },
+  "notes": {
+    "buzzer": "Connect buzzer signal to GPIO 17 (Physical Pin 11), Ground to GND",
+    "pump_relay": "JQC3F-05VDC-C relay module. IN to GPIO 27 (Physical Pin 13), VCC to 5V, GND to GND",
+    "pin_mapping": {
+      "GPIO_17": "Physical Pin 11",
+      "GPIO_27": "Physical Pin 13",
+      "GPIO_22": "Physical Pin 15"
+    },
+    "safety": "Always test with buzzer first before connecting pump relay"
+  }
+}

@@ -1,0 +1,5 @@
+psutil==5.9.6
+aiohttp==3.9.1
+requests==2.31.0
+RPi.GPIO==0.7.1
+gpiozero==1.6.2
