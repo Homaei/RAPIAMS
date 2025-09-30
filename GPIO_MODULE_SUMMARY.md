@@ -338,7 +338,7 @@ For issues or questions:
 3. Review GPIO configuration in `agent/gpio_config.json`
 4. Check API documentation at http://localhost:8000/docs
 
----
+--- 
 
 **Created: 2025-09-30**
 **Version: 1.0.0**
