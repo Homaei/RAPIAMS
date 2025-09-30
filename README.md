@@ -201,27 +201,236 @@ sudo systemctl start rpi-monitoring-agent
 
 ```mermaid
 graph TB
-    subgraph "Raspberry Pi Devices"
-        A[Pi Device 1] --> D[Enhanced Agent]
-        B[Pi Device 2] --> E[Enhanced Agent]
-        C[Pi Device N] --> F[Enhanced Agent]
+    subgraph "Physical Hardware Layer"
+        PUMP[💧 Water Pump]
+        BUZZER[🔊 Buzzer]
+        RELAY[⚡ Relay Module]
+        SENSOR[🌡️ Sensors]
+    end
+
+    subgraph "Raspberry Pi Device 1"
+        GPIO1[🔌 GPIO Controller]
+        AGENT1[📊 Enhanced Agent]
+
+        GPIO1 --> PUMP
+        GPIO1 --> BUZZER
+        GPIO1 --> RELAY
+        SENSOR --> AGENT1
+
+        AGENT1 <--> GPIO1
+
+        subgraph "Monitoring Modules"
+            MON1[CPU Monitor]
+            MON2[Memory Monitor]
+            MON3[Disk Monitor]
+            MON4[Network Monitor]
+            MON5[Temperature Monitor]
+            MON6[User Manager]
+        end
+
+        AGENT1 --> MON1
+        AGENT1 --> MON2
+        AGENT1 --> MON3
+        AGENT1 --> MON4
+        AGENT1 --> MON5
+        AGENT1 --> MON6
+    end
+
+    subgraph "Raspberry Pi Device 2"
+        AGENT2[📊 Enhanced Agent]
+        GPIO2[🔌 GPIO Controller]
+    end
+
+    subgraph "Raspberry Pi Device N"
+        AGENTN[📊 Enhanced Agent]
+        GPION[🔌 GPIO Controller]
     end
 
     subgraph "Backend Infrastructure"
-        D --> G[Load Balancer]
-        E --> G
-        F --> G
-        G --> H[FastAPI Backend]
-        H --> I[PostgreSQL]
-        H --> J[Redis Cache]
-        H --> K[Alert Manager]
+        LB[⚖️ Load Balancer / Nginx]
+        API[🚀 FastAPI Backend]
+
+        subgraph "API Endpoints"
+            EP1[Auth API]
+            EP2[Device API]
+            EP3[Metrics API]
+            EP4[Monitoring APIs]
+            EP5[🔌 GPIO Control API]
+            EP6[WebSocket API]
+        end
+
+        subgraph "Data Layer"
+            DB[(🗄️ PostgreSQL)]
+            CACHE[(⚡ Redis Cache)]
+        end
+
+        subgraph "Services"
+            ALERT[🚨 Alert Manager]
+            WSMANAGER[🔄 WebSocket Manager]
+        end
     end
 
-    subgraph "Monitoring & Analytics"
-        H --> L[Real-time Dashboard]
-        H --> M[Grafana Analytics]
-        K --> N[Notification Services]
+    subgraph "Monitoring & Analytics Dashboard"
+        DASH[📱 Real-time Dashboard]
+        GRAFANA[📊 Grafana Analytics]
+
+        subgraph "Dashboard Features"
+            D1[System Metrics]
+            D2[GPIO Control Panel]
+            D3[Pump Status]
+            D4[Alert History]
+        end
     end
+
+    subgraph "Notification Layer"
+        EMAIL[📧 Email Alerts]
+        WEBHOOK[🔗 Webhooks]
+        NOTIF[🔔 Push Notifications]
+    end
+
+    %% Agent to Backend connections
+    AGENT1 -->|HTTPS/WSS| LB
+    AGENT2 -->|HTTPS/WSS| LB
+    AGENTN -->|HTTPS/WSS| LB
+
+    LB --> API
+
+    %% API internal connections
+    API --> EP1
+    API --> EP2
+    API --> EP3
+    API --> EP4
+    API --> EP5
+    API --> EP6
+
+    %% Backend to Data Layer
+    API --> DB
+    API --> CACHE
+    API --> ALERT
+    API --> WSMANAGER
+
+    %% WebSocket bidirectional
+    WSMANAGER <-.GPIO Commands.-> AGENT1
+    WSMANAGER <-.GPIO Commands.-> AGENT2
+    WSMANAGER <-.GPIO Commands.-> AGENTN
+
+    %% Dashboard connections
+    API --> DASH
+    API --> GRAFANA
+
+    DASH --> D1
+    DASH --> D2
+    DASH --> D3
+    DASH --> D4
+
+    %% Alert connections
+    ALERT --> EMAIL
+    ALERT --> WEBHOOK
+    ALERT --> NOTIF
+
+    %% Styling
+    classDef hardware fill:#ff9800,stroke:#f57c00,stroke-width:3px,color:#fff
+    classDef gpio fill:#4caf50,stroke:#388e3c,stroke-width:3px,color:#fff
+    classDef agent fill:#2196f3,stroke:#1976d2,stroke-width:2px,color:#fff
+    classDef backend fill:#9c27b0,stroke:#7b1fa2,stroke-width:2px,color:#fff
+    classDef data fill:#f44336,stroke:#d32f2f,stroke-width:2px,color:#fff
+    classDef dashboard fill:#00bcd4,stroke:#0097a7,stroke-width:2px,color:#fff
+
+    class PUMP,BUZZER,RELAY,SENSOR hardware
+    class GPIO1,GPIO2,GPION gpio
+    class AGENT1,AGENT2,AGENTN agent
+    class API,LB,EP5 backend
+    class DB,CACHE data
+    class DASH,GRAFANA,D2,D3 dashboard
+```
+
+#### 🔄 Data Flow
+
+**1. Monitoring Flow (Agent → Backend):**
+```
+Sensors/System → Agent Modules → WebSocket → Backend API → Database → Dashboard
+```
+
+**2. GPIO Control Flow (Dashboard → Hardware):**
+```
+User Dashboard → API Request → WebSocket Manager → Agent GPIO Controller → Physical Device (Pump/Buzzer)
+```
+
+**3. Status Update Flow (Hardware → Dashboard):**
+```
+GPIO Controller → Agent → WebSocket → Backend → Real-time Dashboard Update
+```
+
+#### 🔌 GPIO Control Architecture Details
+
+```mermaid
+graph LR
+    subgraph "Web Client"
+        USER[👤 User]
+        UI[🖥️ Control Panel]
+    end
+
+    subgraph "Backend API"
+        AUTH[🔐 Authentication]
+        GPIO_API[🔌 GPIO Endpoints]
+        WS[🔄 WebSocket]
+    end
+
+    subgraph "Raspberry Pi"
+        AGENT[📊 Agent]
+        GPIO_CTL[⚡ GPIO Controller]
+
+        subgraph "GPIO Devices"
+            DEV1[Device Registry]
+            DEV2[Safety Manager]
+            DEV3[Status Monitor]
+        end
+
+        subgraph "Hardware Pins"
+            PIN17[GPIO 17 - Buzzer]
+            PIN27[GPIO 27 - Pump Relay]
+            PIN22[GPIO 22 - Backup]
+        end
+    end
+
+    subgraph "Physical Devices"
+        BUZZER[🔊 Buzzer]
+        PUMP[💧 Water Pump]
+        MOTOR[⚙️ Motor/Valve]
+    end
+
+    USER --> UI
+    UI -->|POST /gpio/device/pump/start| AUTH
+    AUTH --> GPIO_API
+    GPIO_API -->|Command| WS
+    WS -.->|WebSocket Message| AGENT
+    AGENT --> GPIO_CTL
+    GPIO_CTL --> DEV1
+    GPIO_CTL --> DEV2
+    GPIO_CTL --> DEV3
+
+    GPIO_CTL --> PIN17
+    GPIO_CTL --> PIN27
+    GPIO_CTL --> PIN22
+
+    PIN17 --> BUZZER
+    PIN27 --> PUMP
+    PIN22 --> MOTOR
+
+    %% Status feedback
+    GPIO_CTL -.Status.-> AGENT
+    AGENT -.Status Update.-> WS
+    WS -.Real-time Update.-> UI
+
+    classDef client fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef api fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef device fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef hardware fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+
+    class USER,UI client
+    class AUTH,GPIO_API,WS api
+    class AGENT,GPIO_CTL,DEV1,DEV2,DEV3 device
+    class BUZZER,PUMP,MOTOR hardware
 ```
 
 ### 📂 Project Structure
@@ -240,6 +449,10 @@ RAPIAMS/
 │   │   │   ├── device.py       # Device management
 │   │   │   └── metrics.py      # Metrics storage
 │   │   ├── schemas/            # Pydantic schemas
+│   │   │   ├── auth.py         # Authentication schemas
+│   │   │   ├── device.py       # Device schemas
+│   │   │   ├── metrics.py      # Metrics schemas
+│   │   │   └── gpio.py         # 🔌 GPIO schemas (NEW!)
 │   │   ├── api/                # API endpoints
 │   │   │   └── v1/
 │   │   │       ├── auth.py     # Authentication endpoints
@@ -252,7 +465,8 @@ RAPIAMS/
 │   │   │       ├── disk.py     # Disk monitoring API
 │   │   │       ├── network.py  # Network monitoring API
 │   │   │       ├── temperature.py # Temperature monitoring API
-│   │   │       └── users.py    # User management API
+│   │   │       ├── users.py    # User management API
+│   │   │       └── gpio.py     # 🔌 GPIO control API (NEW!)
 │   │   └── services/           # Business logic
 │   ├── alembic/                # Database migrations
 │   ├── requirements.txt        # Python dependencies
@@ -262,6 +476,7 @@ RAPIAMS/
 │   ├── enhanced_config.py      # Agent configuration
 │   ├── enhanced_collector.py   # Metrics collection
 │   ├── enhanced_sender.py      # API communication
+│   ├── gpio_config.json        # 🔌 GPIO device configuration
 │   ├── modules/                # Specialized monitoring modules
 │   │   ├── __init__.py         # Module initialization
 │   │   ├── system_monitor.py   # System information monitoring
@@ -270,7 +485,8 @@ RAPIAMS/
 │   │   ├── disk_monitor.py     # Disk usage and I/O stats
 │   │   ├── network_monitor.py  # Network interfaces and traffic
 │   │   ├── temperature_monitor.py # Temperature sensors
-│   │   └── user_manager.py     # User management and monitoring
+│   │   ├── user_manager.py     # User management and monitoring
+│   │   └── gpio_controller.py  # 🔌 GPIO control module (NEW!)
 │   ├── management.py           # CLI management tools
 │   ├── utils/                  # Utility functions
 │   ├── install.sh              # Installation script
@@ -280,7 +496,12 @@ RAPIAMS/
 ├── 🗃️  nginx/                  # Reverse proxy configuration
 ├── 📊 monitoring/              # Grafana & Prometheus configs
 ├── 🧪 tests/                   # Comprehensive test suite
-└── 📋 docs/                    # Additional documentation
+│   ├── test_gpio_control.py    # 🔌 GPIO module tests
+│   └── test_gpio_standalone.py # Standalone GPIO tests
+├── 📋 docs/                    # Additional documentation
+│   ├── GPIO_MODULE_SUMMARY.md  # GPIO implementation details
+│   └── TEST_RESULTS.md         # Comprehensive test results
+└── README.md                   # This file
 ```
 
 ### 🔧 Configuration
@@ -811,6 +1032,7 @@ services:
 | **Temperature** | CPU temp, ambient sensors, thermal throttling | Thermal monitoring |
 | **Users** | Active users, login history, security events | User activity |
 | **Hardware** | Voltage, GPIO states, hardware health | Hardware monitoring |
+| **GPIO Control** | Device status, runtime, cycles, safety limits | Device automation |
 | **Security** | Failed logins, SSH connections, audit logs | Security auditing |
 | **Application** | Custom metrics, process status, services | Application monitoring |
 
