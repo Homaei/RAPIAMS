@@ -473,24 +473,6 @@ For support and documentation:
 //////////////////////////////////////
 
 
-# RAPIAMS Agent
-
-A powerful, lightweight monitoring tool designed to run on Raspberry Pi devices for comprehensive system monitoring and alerting.
-
-## Overview
-
-The RAPIAMS Agent collects a wide range of system metrics from your Raspberry Pi, sends them to a central RAPIAMS backend for analysis and visualization, and can be configured to send alerts based on predefined thresholds.
-
-## Features
-
-- **Comprehensive System Monitoring:** Monitor CPU usage, memory, disk space, network activity, and temperature
-- **GPIO Monitoring and Control:** Read the state of GPIO pins and control output devices
-- **Custom Script Execution:** Extend functionality by running your own scripts and reporting their output as metrics
-- **Alerting:** Configure thresholds for metrics to trigger alerts when limits are exceeded
-- **Automated Installation:** Simple installation script gets you running quickly
-- **Robust and Reliable:** Runs as a systemd service with automatic restarts
-- **Flexible Configuration:** Easy-to-use interactive setup and detailed manual configuration options
-
 ## Prerequisites
 
 Before installing the RAPIAMS Agent, ensure you have:
